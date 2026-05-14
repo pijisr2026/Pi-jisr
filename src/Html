@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Jisr Pi</title>
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+:root{--bg:#0a0f1d;--teal:#0fd4c8;--card:#161e31;--text:#e8edf8;--border:rgba(15,212,200,0.2)}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
+body{background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column}
+.header{background:#0f172a;padding:15px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.page-container{flex:1;overflow-y:auto;padding:15px}
+.page{display:none}.page.active{display:block}
+.card{background:var(--card);padding:18px;border-radius:15px;border:1px solid var(--border);margin-bottom:20px}
+.btn-action{background:var(--teal);color:#0a0f1d;border:none;padding:15px;border-radius:12px;font-size:16px;font-weight:bold;width:100%;cursor:pointer}
+.nav{position:fixed;bottom:0;left:0;right:0;height:75px;background:#0f172a;display:flex;border-top:1px solid var(--border)}
+.nav-item{flex:1;color:#64748b;background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;cursor:pointer}
+.nav-item.active{color:var(--teal)}
 <style>
 :root{--bg:#0a0f1d;--teal:#0fd4c8;--card:#161e31;--text:#e8edf8;--border:rgba(15,212,200,0.2);--input-bg:#0f172a;--error:#ef4444;--success:#22c55e}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
