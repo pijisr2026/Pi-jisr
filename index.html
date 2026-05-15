@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
+
+<meta http-equiv="Content-Security-Policy"
+content="
+default-src 'self' https://sdk.minepi.com;
+script-src 'self' 'unsafe-inline' https://sdk.minepi.com;
+style-src 'self' 'unsafe-inline';
+connect-src 'self' https://api.minepi.com https://sdk.minepi.com;
+img-src 'self' data:;
+">
+
+<title>جسر Pi</title>
+
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
+<style>
+body{
+background:#080e1a;
+color:#fff;
+font-family:tahoma;
+max-width:480px;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:#111827;
+padding:20px;
+border-radius:16px;
+margin-bottom:15px;
+border:1px solid #1f2937;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+font-size:16px;
+font-weight:bold;
+margin-top:10px;
+}
+
+.btn{
+background:#00bcd4;
+color:#fff;
+}
+
+input{
+width:100%;
+padding:14px;
+border-radius:12px;
+border:1px solid #333;
+background:#0f172a;
+color:#fff;
+margin-top:10px;
+}
+
+.toast{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+background:#0f172a;
+padding:12px 20px;
+border-radius:12px;
+display:none;
+z-index:9999;
+border:1px solid #00bcd4;
+}
+</style>
+</head>
+
+<body>
+
+<div class="toast" id="toast"></div>
+
+<div class="card">
+<h2>جسر Pi</h2>
+<p id="status">غير مسجل الدخول</p>
+
+<button class="btn" id="loginBtn">
+تسجيل الدخول عبر Pi
+</button>
+</div>
+
+<div class="card">
+<h3>استثمار تجريبي</h3>
+
+<input type="number" id="amount" value="1" />
+
+<button class="btn" id="payBtn">
+دفع Pi
+</button>
+</div>
+
+<script>
+
+let currentUser = null;
+
+function toast(msg){
+const t = document.getElementById("toast");
+t.innerText = msg;
+t.style.display = "block";
+
+setTimeout(()=>{
+t.style.display = "none";
+},3000);
+}
+
+window.addEventListener("load", async ()=>{
+
+if(typeof Pi === "undefined"){
+toast("افتح التطبيق داخل Pi Browser");
+return;
+}
+
+try{
+
+Pi.init({
+version:"2.0",
+sandbox:true
+});
+
+toast("تم تحميل Pi SDK");
+
+}catch(err){
+
+console.error(err);
+toast("فشل تحميل Pi SDK");
+
+}
+
+});
+
+document.getElementById("loginBtn")
+.addEventListener("click", async ()=>{
+
+try{
+
+const scopes = ['username','payments'];
+
+const auth = await Pi.authenticate(
+scopes,
+function(payment){
+console.log(payment);
+}
+);
+
+currentUser = auth.user;
+
+document.getElementById("status").innerText =
+"مرحباً " + currentUser.username;
+
+toast("تم تسجيل الدخول");
+
+}catch(err){
+
+console.error(err);
+toast("فشل تسجيل الدخول");
+
+}
+
+});
+
+document.getElementById("payBtn")
+.addEventListener("click", ()=>{
+
+if(!currentUser){
+
+toast("سجل الدخول أولاً");
+return;
+
+}
+
+const amount =
+parseFloat(document.getElementById("amount").value);
+
+if(!amount || amount <= 0){
+
+toast("أدخل مبلغ صحيح");
+return;
+
+}
+
+Pi.createPayment({
+
+amount: amount,
+
+memo: "استثمار عبر جسر Pi",
+
+metadata: {
+type:"investment"
+}
+
+},
+
+{
+
+onReadyForServerApproval: function(paymentId){
+
+console.log("جاهز للموافقة", paymentId);
+
+/*
+هنا ترسل الطلب للسيرفر الحقيقي
+
+fetch("/approve",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+paymentId
+})
+})
+
+*/
+
+},
+
+onReadyForServerCompletion: function(paymentId, txid){
+
+console.log("جاهز للإكمال", paymentId, txid);
+
+/*
+
+fetch("/complete",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+paymentId,
+txid
+})
+})
+
+*/
+
+toast("تم الدفع بنجاح");
+
+},
+
+onCancel: function(paymentId){
+
+toast("تم إلغاء الدفع");
+
+},
+
+onError: function(error){
+
+console.error(error);
+
+toast("خطأ أثناء الدفع");
+
+}
+
+});
+
+});
+
+</script>
+
+</body>
+</html>
